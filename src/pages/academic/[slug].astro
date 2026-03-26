@@ -1,0 +1,226 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PaperBlock from "../../components/PaperBlock.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const notes = await getCollection("academic");
+
+  return notes
+    .map((note) => ({
+      params: { slug: note.id.replace(/\.(md|mdx)$/i, "") },
+      props: { entryId: note.id },
+    }));
+}
+
+const { slug } = Astro.params;
+const { entryId } = Astro.props as { entryId?: string };
+let entryData: { title: string; summary: string } | undefined;
+let body = "";
+
+if (slug) {
+  const all = await getCollection("academic");
+  const hit = all.find(
+    (item) => item.id === entryId || item.id.replace(/\.(md|mdx)$/i, "") === slug,
+  );
+  if (hit) {
+    entryData = {
+      title: hit.data.title,
+      summary: hit.data.summary,
+    };
+    body = hit.body ?? "";
+  }
+}
+
+if (!entryData) {
+  throw new Error(`Note not found: ${slug ?? "unknown"}`);
+}
+
+type Paper = {
+  paperIndex: number;
+  paperTitle: string;
+  arxivUrl?: string;
+  hallucinationTranslationUrl?: string;
+  images: string[];
+  imageModes: Array<"local" | "remote">;
+  coreIdea: string;
+  abstract: string;
+  rating?: number;
+  warnings: string[];
+};
+
+function getField(block: string, key: string) {
+  const match = block.match(new RegExp(`###\\s+${key}\\s*([\\s\\S]*?)(?=\\n###\\s+|$)`, "i"));
+  return match ? match[1].trim() : "";
+}
+
+function getFieldByAliases(block: string, aliases: string[]) {
+  for (const alias of aliases) {
+    const value = getField(block, alias).trim();
+    if (value) {
+      return value;
+    }
+  }
+  return "";
+}
+
+function parseHttpUrl(raw: string) {
+  return /^https?:\/\//i.test(raw) ? raw : undefined;
+}
+
+function parseImages(raw: string) {
+  return raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("- "))
+    .map((line) => line.slice(2).trim())
+    .filter(Boolean);
+}
+
+function isRemoteImage(src: string) {
+  return /^https?:\/\//i.test(src) || src.startsWith("//");
+}
+
+function isLocalImage(src: string) {
+  return src.startsWith("/") || src.startsWith("./") || src.startsWith("../");
+}
+
+function parsePapers(markdown: string): Paper[] {
+  const blocks = markdown
+    .split(/\n##\s+Paper\s*\n/i)
+    .slice(1)
+    .map((b) => b.split(/\n---\s*\n/)[0].trim())
+    .filter(Boolean);
+
+  return blocks.map((block, idx) => {
+    const warnings: string[] = [];
+    const paperIndex = idx + 1;
+
+    const title = getField(block, "title") || "Untitled Paper";
+
+    const arxivRaw = getFieldByAliases(block, ["arxiv-link", "arxiv link", "link"]);
+    const hallucinationTranslationRaw = getFieldByAliases(block, [
+      "hallucination-translation-link",
+      "hallucination translation link",
+      "幻觉翻译 link",
+    ]);
+
+    const arxivUrl = parseHttpUrl(arxivRaw);
+    if (!arxivRaw) {
+      warnings.push("缺少 arxiv-link 字段：该论文不会展示 ArXiv 链接。");
+    } else if (!arxivUrl) {
+      warnings.push(`arxiv-link 无效：仅支持 http/https，当前值为 \"${arxivRaw}\"。`);
+    }
+
+    const hallucinationTranslationUrl = parseHttpUrl(hallucinationTranslationRaw);
+    if (!hallucinationTranslationRaw) {
+      warnings.push("缺少 hallucination-translation-link 字段：该论文不会展示幻觉翻译链接。");
+    } else if (!hallucinationTranslationUrl) {
+      warnings.push(
+        `hallucination-translation-link 无效：仅支持 http/https，当前值为 \"${hallucinationTranslationRaw}\"。`,
+      );
+    }
+
+    const ratingRaw = getField(block, "rating");
+    const ratingNum = Number.parseFloat(ratingRaw.trim());
+    let rating: number | undefined;
+    if (!ratingRaw.trim()) {
+      warnings.push("缺少 rating 字段：将显示为“未评分”。");
+    } else if (!Number.isFinite(ratingNum)) {
+      warnings.push(`rating 无效：\"${ratingRaw.trim()}\" 不是数字，将显示为“未评分”。`);
+    } else if (ratingNum < 0 || ratingNum > 5) {
+      warnings.push(`rating 超出范围：${ratingNum} 不在 [0, 5]，已自动钳制。`);
+      rating = Math.max(0, Math.min(5, ratingNum));
+    } else {
+      rating = ratingNum;
+    }
+
+    const imagesRaw = getField(block, "images");
+    const images = parseImages(imagesRaw);
+    if (!imagesRaw.trim()) {
+      warnings.push("缺少 images 字段：当前论文不展示配图。");
+    } else if (images.length === 0) {
+      warnings.push("images 字段格式不正确：请使用列表形式（每行以 '- ' 开头）。");
+    }
+
+    const imageModes: Array<"local" | "remote"> = [];
+    for (const src of images) {
+      if (isRemoteImage(src)) {
+        imageModes.push("remote");
+        continue;
+      }
+      if (isLocalImage(src)) {
+        imageModes.push("local");
+        continue;
+      }
+      imageModes.push("local");
+      warnings.push(`images 路径可疑：\"${src}\" 既不是远程 URL，也不是推荐的本地路径（/、./、../）。`);
+    }
+
+    return {
+      paperIndex,
+      paperTitle: title,
+      arxivUrl,
+      hallucinationTranslationUrl,
+      images,
+      imageModes,
+      coreIdea: getField(block, "core-idea"),
+      abstract: getField(block, "abstract"),
+      rating,
+      warnings,
+    };
+  });
+}
+
+const papers = parsePapers(body);
+---
+
+<Layout title={`${entryData.title} | Academic`}>
+  <section class="head card">
+    <a href="/academic" class="back">← Back to Academic</a>
+    <h1>{entryData.title}</h1>
+    <p>{entryData.summary}</p>
+  </section>
+
+  <section class="paper-list">
+    {papers.map((paper) => <PaperBlock paper={paper} />)}
+  </section>
+</Layout>
+
+<style>
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(16, 37, 61, 0.05);
+  }
+
+  .head {
+    padding: 1.15rem;
+  }
+
+  .back {
+    text-decoration: none;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.93rem;
+  }
+
+  h1 {
+    margin: 0.35rem 0 0.4rem;
+    font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+  }
+
+  .head p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .paper-list {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+</style>

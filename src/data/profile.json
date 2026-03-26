@@ -1,0 +1,46 @@
+{
+  "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80",
+  "name": "Your Name",
+  "school": {
+    "degree": "Ph.D. Student in Computer Science",
+    "university": "Your University",
+    "lab": "Your Lab / Group",
+    "focus": "Research Focus: AI4Science, Representation Learning"
+  },
+  "awards": [
+    {
+      "year": "2025",
+      "title": "National Scholarship",
+      "description": "Awarded for outstanding academic performance and research progress."
+    },
+    {
+      "year": "2024",
+      "title": "Best Student Paper Nomination",
+      "description": "Nominated at an international conference workshop."
+    }
+  ],
+  "researchExperiences": [
+    {
+      "period": "2024 - Present",
+      "role": "Research Assistant",
+      "organization": "Your Lab, Your University",
+      "details": "Working on efficient multimodal representation learning with weak supervision."
+    },
+    {
+      "period": "2022 - 2024",
+      "role": "Undergraduate Researcher",
+      "organization": "Your Previous Group",
+      "details": "Explored graph neural networks for knowledge tracing and educational data mining."
+    }
+  ],
+  "publications": [
+    {
+      "year": "2026",
+      "citation": "Your Name, Coauthor A, Coauthor B. A Unified Framework for ... In Conference XYZ 2026."
+    },
+    {
+      "year": "2025",
+      "citation": "Your Name, Coauthor C. Towards Data-Efficient ... Journal ABC, 2025."
+    }
+  ]
+}

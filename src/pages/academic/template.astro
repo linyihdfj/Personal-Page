@@ -1,0 +1,44 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Academic Markdown Template">
+  <section class="card">
+    <h1>Academic Markdown Template</h1>
+    <p>
+      Copy the file at <strong>src/content/academic/_template.md</strong>, rename it with a new slug,
+      then fill the fields. It will appear automatically in Academic list and detail pages.
+    </p>
+    <ul>
+      <li><strong>图片双模式：</strong>支持本地路径（/images/...、./、../）和远程 URL（https://...）。</li>
+      <li><strong>严格容错：</strong>缺失或格式错误的 rating/link/images 会在页面显示 warning。</li>
+      <li><strong>推荐写法：</strong>本地图片统一放到 <strong>public/images</strong> 并使用 <strong>/images/...</strong>。</li>
+    </ul>
+  </section>
+</Layout>
+
+<style>
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(16, 37, 61, 0.05);
+    padding: 1.2rem;
+  }
+
+  h1 {
+    margin-top: 0;
+  }
+
+  p {
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  ul {
+    margin: 0.8rem 0 0;
+    padding-left: 1.2rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+</style>
