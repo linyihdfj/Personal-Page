@@ -7,26 +7,18 @@ import profileData from "../data/profile.json";
   <section class="hero card">
     <img src={profileData.avatar} alt={`${profileData.name} avatar`} class="avatar" />
     <div>
-      <p class="eyebrow">Profile</p>
+      <!-- <p class="eyebrow">Profile</p> -->
       <h1>{profileData.name}</h1>
-      <p class="lead">{profileData.school.degree}</p>
-      <p class="muted">{profileData.school.university} · {profileData.school.lab}</p>
-      <p class="muted">{profileData.school.focus}</p>
+      <ul class="hero-info">
+        <li><strong>学位:</strong> {profileData.school.degree}</li>
+        <li><strong>学校:</strong> {profileData.school.university}</li>
+        <li><strong>研究方向:</strong> {profileData.school.focus}</li>
+      </ul>
     </div>
   </section>
 
   <section class="card section">
-    <h2>School Information</h2>
-    <ul>
-      <li><strong>Degree:</strong> {profileData.school.degree}</li>
-      <li><strong>University:</strong> {profileData.school.university}</li>
-      <li><strong>Lab:</strong> {profileData.school.lab}</li>
-      <li><strong>Research Focus:</strong> {profileData.school.focus}</li>
-    </ul>
-  </section>
-
-  <section class="card section">
-    <h2>Awards</h2>
+    <h2>所获奖项</h2>
     <div class="stack">
       {
         profileData.awards.map((item) => (
@@ -43,7 +35,7 @@ import profileData from "../data/profile.json";
   </section>
 
   <section class="card section">
-    <h2>Research Experience</h2>
+    <h2>科研经历</h2>
     <div class="stack">
       {
         profileData.researchExperiences.map((exp) => (
@@ -61,7 +53,7 @@ import profileData from "../data/profile.json";
   </section>
 
   <section class="card section">
-    <h2>Publications</h2>
+    <h2>发表论文</h2>
     <ol class="pub-list">
       {
         profileData.publications.map((pub) => (
@@ -110,14 +102,22 @@ import profileData from "../data/profile.json";
     font-size: clamp(1.45rem, 2.2vw, 2rem);
   }
 
-  .lead {
-    margin: 0;
-    color: var(--primary);
-    font-weight: 600;
-  }
-
   .muted {
     color: var(--muted);
+  }
+
+  .hero-info {
+    margin: 0.55rem 0 0;
+    padding-left: 1.1rem;
+    line-height: 1.8;
+  }
+
+  .hero-info li {
+    color: var(--muted);
+  }
+
+  .hero-info strong {
+    color: var(--text);
   }
 
   .section {
@@ -128,12 +128,6 @@ import profileData from "../data/profile.json";
   h2 {
     margin: 0;
     font-size: 1.2rem;
-  }
-
-  ul {
-    margin: 0.8rem 0 0;
-    padding-left: 1.2rem;
-    line-height: 1.8;
   }
 
   .stack {
