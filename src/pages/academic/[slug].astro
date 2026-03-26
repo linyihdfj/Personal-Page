@@ -173,11 +173,12 @@ function parsePapers(markdown: string): Paper[] {
 }
 
 const papers = parsePapers(body);
+const baseUrl = import.meta.env.BASE_URL;
 ---
 
 <Layout title={`${entryData.title} | Academic`}>
   <section class="head card">
-    <a href="/academic" class="back">← Back to Academic</a>
+    <a href={`${baseUrl}academic/`} class="back">← Back to Academic</a>
     <h1>{entryData.title}</h1>
     <p>{entryData.summary}</p>
   </section>

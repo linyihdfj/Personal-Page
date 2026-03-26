@@ -1,9 +1,15 @@
 ---
 const pathname = Astro.url.pathname;
+const baseUrl = import.meta.env.BASE_URL;
+
+const normalizePath = (path: string) => {
+  if (path.length > 1 && path.endsWith("/")) return path.slice(0, -1);
+  return path;
+};
 
 const links = [
-  { href: "/profile", label: "Profile" },
-  { href: "/academic", label: "Academic" },
+  { href: `${baseUrl}profile/`, label: "Profile" },
+  { href: `${baseUrl}academic/`, label: "Academic" },
 ];
 ---
 
@@ -11,7 +17,9 @@ const links = [
   <nav class="nav">
     {
       links.map((item) => {
-        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const currentPath = normalizePath(pathname);
+        const targetPath = normalizePath(item.href);
+        const active = currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
         return (
           <a href={item.href} class={`nav-link ${active ? "active" : ""}`}>
             {item.label}
