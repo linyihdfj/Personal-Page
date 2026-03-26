@@ -4,7 +4,7 @@ import { defineConfig } from "astro/config";
 // https://astro.build/config
 export default defineConfig({
   // GitHub Pages configuration
-  site: "https://linyihdfj.github.io/",
+  site: "https://linyihdfj.github.io/Personal-Page/",
   base: process.env.NODE_ENV === "production" ? "/bizarre-belt/" : "/",
   output: "static",
 });
