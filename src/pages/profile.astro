@@ -1,11 +1,38 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import profileData from "../data/profile.json";
+import rawProfileData from "../data/profile.json";
+
+type Award = { year: string; title: string };
+type ResearchExperience = {
+  role: string;
+  period: string;
+  organization: string;
+  details: string;
+};
+type Publication = { year: string; citation: string };
+type ProfileData = {
+  avatar: string;
+  name: string;
+  school: {
+    degree: string;
+    university: string;
+    focus: string;
+  };
+  awards: Award[];
+  researchExperiences: ResearchExperience[];
+  publications: Publication[];
+};
+
+const profileData = rawProfileData as ProfileData;
+
+const avatarUrl = /^https?:\/\//i.test(profileData.avatar)
+  ? profileData.avatar
+  : `${import.meta.env.BASE_URL}${profileData.avatar.replace(/^\//, "")}`;
 ---
 
 <Layout title="Profile | Personal Blog">
   <section class="hero card">
-    <img src={profileData.avatar} alt={`${profileData.name} avatar`} class="avatar" />
+    <img src={avatarUrl} alt={`${profileData.name} avatar`} class="avatar" />
     <div>
       <!-- <p class="eyebrow">Profile</p> -->
       <h1>{profileData.name}</h1>
@@ -27,7 +54,6 @@ import profileData from "../data/profile.json";
               <h3>{item.title}</h3>
               <span>{item.year}</span>
             </div>
-            <p>{item.description}</p>
           </article>
         ))
       }
